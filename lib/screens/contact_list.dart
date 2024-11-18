@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:myapp/widgets/custom_app_bar.dart';
 import 'add_contact_screen.dart';
-import 'search_contacts_widget.dart'; // Importa o novo widget de busca
+import '../widgets/search_contacts_widget.dart'; // Importa o novo widget de busca
 
 class ContactList extends StatelessWidget {
   ContactList({super.key});
