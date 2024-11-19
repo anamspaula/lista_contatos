@@ -3,7 +3,7 @@ import 'package:myapp/widgets/custom_app_bar.dart';
 import 'add_contact_screen.dart';
 import '../widgets/search_contacts_widget.dart'; // Importa o novo widget de busca
 
-//for up the branch development
+//Example branch after create branch development
 
 class ContactList extends StatelessWidget {
   ContactList({super.key});
