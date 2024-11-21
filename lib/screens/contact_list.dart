@@ -8,6 +8,9 @@ import '../widgets/search_contacts_widget.dart'; // Importa o novo widget de bus
 class ContactList extends StatelessWidget {
   ContactList({super.key});
 
+  // final UsersStrore users = UsersStrore<List<Users>>(repository: UsersRepository(client: HttpsClient()));
+
+
   // Lista de contatos mockados
   final List<Map<String, String>> contacts = [
     {'Nome': 'Ana', 'Telefone': '1234-5678', 'Email': 'ana@teste.com'},
