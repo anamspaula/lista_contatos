@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:myapp/data/model/users_model.dart';
 import '../widgets/custom_app_bar.dart'; // Importa o CustomAppBar
 
 class EditContacts extends StatelessWidget {
-  final Map<String, String> contact;
+  final Users? contact;
 
   const EditContacts({super.key, required this.contact});
 
@@ -20,19 +21,19 @@ class EditContacts extends StatelessWidget {
             _buildTextField(
               label: 'Nome',
               icon: Icons.person,
-              initialValue: contact['Nome'],
+              initialValue: contact?.name,
             ),
             const SizedBox(height: 16.0),
             _buildTextField(
               label: 'Telefone',
               icon: Icons.phone,
-              initialValue: contact['Telefone'],
+              initialValue: contact?.telefone,
             ),
             const SizedBox(height: 16.0),
             _buildTextField(
               label: 'Email',
               icon: Icons.email,
-              initialValue: contact['Email'],
+              initialValue: contact?.email,
             ),
             const SizedBox(height: 16.0),
             Row(

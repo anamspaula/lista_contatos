@@ -1,25 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:myapp/https/https_client.dart';
+import 'package:myapp/repository/users_repository.dart';
+import 'package:myapp/screens/stores/users_strore.dart';
 import 'package:myapp/widgets/custom_app_bar.dart';
 import 'add_contact_screen.dart';
 import '../widgets/search_contacts_widget.dart'; // Importa o novo widget de busca
 
-//for up the branch development
-
 class ContactList extends StatelessWidget {
   ContactList({super.key});
 
-  // final UsersStrore users = UsersStrore<List<Users>>(repository: UsersRepository(client: HttpsClient()));
-
-
-  // Lista de contatos mockados
-  final List<Map<String, String>> contacts = [
-    {'Nome': 'Ana', 'Telefone': '1234-5678', 'Email': 'ana@teste.com'},
-    {'Nome': 'Bruno', 'Telefone': '9876-5432', 'Email': 'bruno@teste.com'},
-    {'Nome': 'Carlos', 'Telefone': '5555-5555', 'Email': 'carlos@teste.com'},
-    {'Nome': 'Diana', 'Telefone': '1111-2222', 'Email': 'diana@teste.com'},
-    {'Nome': 'Eduardo', 'Telefone': '3333-4444', 'Email': 'eduardo@teste.com'},
-  ];
-
+  final UsersStrore users = UsersStrore(repository: UsersRepository(client: HttpsClient()));
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -44,7 +34,7 @@ class ContactList extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            SearchContactsWidget(contacts: contacts), // Novo widget de busca
+            SearchContactsWidget(usersStrore: users,), // Novo widget de busca
           ],
         ),
       ),
