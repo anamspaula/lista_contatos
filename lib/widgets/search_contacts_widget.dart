@@ -14,21 +14,13 @@ class SearchContactsWidget extends StatefulWidget {
 
 class _SearchContactsWidgetState extends State<SearchContactsWidget> {
   final TextEditingController _searchController = TextEditingController();
-  Users? _searchResult;
+  Iterable<Users>? _searchResult;
 
   void _searchContact() {
     final query = _searchController.text.toLowerCase();
     setState(() {
-      _searchResult = widget.usersStrore.state.value.firstWhere(
-        (contact) => contact.name.toLowerCase().contains(query),
-        orElse: () => Users(
-          id: "id",
-          name: "name",
-          email: "email",
-          telefone: "telefone",
-          createdAt: DateTime(2024),
-          updatedAt: DateTime(2024),
-        ),
+      _searchResult = widget.usersStrore.state.value.where(
+        (contact) => contact.name.toLowerCase().contains(query)
       );
     });
   }
@@ -36,7 +28,12 @@ class _SearchContactsWidgetState extends State<SearchContactsWidget> {
   @override
   void initState() {
     super.initState();
-    widget.usersStrore.getUsers();
+    _initializeUsers();
+  }
+
+  void _initializeUsers() async {
+    await widget.usersStrore.getUsers();
+    setState(() {}); // Atualize o estado após carregar os usuários
   }
 
   @override
@@ -79,7 +76,11 @@ class _SearchContactsWidgetState extends State<SearchContactsWidget> {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Erro ao tentar conectar com o db ${widget.usersStrore.error.value}'),
+                      Text(
+                        textAlign: TextAlign.center,
+                        softWrap: true,
+                        'Erro ao tentar conectar com o db ${widget.usersStrore.error.value}'
+                      ),
                     ],
                   ),
                 ),
@@ -116,51 +117,56 @@ class _SearchContactsWidgetState extends State<SearchContactsWidget> {
                 child: Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(12.0),
-                  child: Row(
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      CircleAvatar(
-                        backgroundColor: Colors.blue,
-                        child: Text(
-                          _searchResult!.name[0],
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12.0),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              _searchResult!.name,
+                    children: _searchResult!.map((user) {
+                      return Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          CircleAvatar(
+                            backgroundColor: Colors.blue,
+                            child: Text(
+                              user.name[0], // Primeiro caractere do nome
                               style: const TextStyle(
+                                color: Colors.white,
                                 fontWeight: FontWeight.bold,
-                                fontSize: 16,
                               ),
                             ),
-                            Text(_searchResult!.telefone),
-                            Text(_searchResult!.email),
-                          ],
-                        ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.edit),
-                        color: Colors.blue,
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => EditContacts(
-                                contact: _searchResult!,
-                              ),
+                          ),
+                          const SizedBox(width: 12.0),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  user.name,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 16,
+                                  ),
+                                ),
+                                Text(user.telefone),
+                                Text(user.email),
+                              ],
                             ),
-                          );
-                        },
-                      ),
-                    ],
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.edit),
+                            color: Colors.blue,
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => EditContacts(
+                                    contact: user,
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ],
+                      );
+                    }).toList(), // Converte o Iterable para uma lista
                   ),
                 ),
               );

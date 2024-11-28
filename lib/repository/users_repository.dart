@@ -25,7 +25,8 @@ class UsersRepository implements IUsersRepository{
     if(response.statusCode == 200){
       final List<Users> responseAPI;
 
-      final ReturnApiUsers body = jsonDecode(response.body) as ReturnApiUsers;
+      // final ReturnApiUsers body = ReturnApiUsers.obj(JsonDecoder(response.body));
+      final ReturnApiUsers body = ReturnApiUsers.obj(JsonDecoder(response.body));
 
       responseAPI = body.response;
 
