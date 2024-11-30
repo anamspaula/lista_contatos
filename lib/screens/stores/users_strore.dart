@@ -9,7 +9,9 @@ class UsersStrore {
   //loading
   final ValueNotifier<bool> isLoading = ValueNotifier<bool>(false);
   //state
-  final ValueNotifier<List<Users>> state= ValueNotifier([]);
+  final ValueNotifier<List<Users>?> state= ValueNotifier([
+        Users(id: "id", name: "name", email: "email", telefone: "telefone", createdAt: DateTime(2024))
+      ]);
   //error
   final ValueNotifier<String> error = ValueNotifier<String>("");
 
@@ -19,12 +21,17 @@ class UsersStrore {
     isLoading.value = true;
 
     try{
-      final result = await repository.getUsers();
-      state.value = result;
+      // final result = await repository.getUsers();
+      // state.value = result;
+      state.value = [
+        Users(id: "id", name: "name", email: "email", telefone: "telefone", createdAt: DateTime(2024))
+      ];
     } on NotFoundException catch(err){
-      error.value = err.message;
+      // throw Exception(err);
+      error.value = "err.message";
     } catch(err) {
-      error.value = err.toString();
+      // throw Exception(err);
+      error.value = "err.toString()";
     }
 
     isLoading.value = false;

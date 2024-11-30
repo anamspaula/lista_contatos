@@ -19,7 +19,7 @@ class _SearchContactsWidgetState extends State<SearchContactsWidget> {
   void _searchContact() {
     final query = _searchController.text.toLowerCase();
     setState(() {
-      _searchResult = widget.usersStrore.state.value.where(
+      _searchResult = widget.usersStrore.state.value!.where(
         (contact) => contact.name.toLowerCase().contains(query)
       );
     });
@@ -33,7 +33,7 @@ class _SearchContactsWidgetState extends State<SearchContactsWidget> {
 
   void _initializeUsers() async {
     await widget.usersStrore.getUsers();
-    setState(() {}); // Atualize o estado após carregar os usuários
+    // setState(() {}); // Atualize o estado após carregar os usuários
   }
 
   @override
@@ -76,10 +76,13 @@ class _SearchContactsWidgetState extends State<SearchContactsWidget> {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        textAlign: TextAlign.center,
-                        softWrap: true,
-                        'Erro ao tentar conectar com o db ${widget.usersStrore.error.value}'
+                      Expanded( // Adicionado para permitir que o texto quebre dentro do espaço disponível
+                        child: Text(
+                          'Erro ao tentar conectar com o db ${widget.usersStrore.error.value}',
+                          textAlign: TextAlign.left, // Ajustado para alinhar corretamente
+                          softWrap: true, // Permite quebra automática
+                          overflow: TextOverflow.clip, // Corta o texto ao final do espaço
+                        ),
                       ),
                     ],
                   ),
@@ -87,7 +90,7 @@ class _SearchContactsWidgetState extends State<SearchContactsWidget> {
               );
             }
 
-            if (widget.usersStrore.state.value.isEmpty) {
+            if (widget.usersStrore.state.value!.isEmpty) {
               return Card(
                 elevation: 2,
                 color: Colors.white,
@@ -119,7 +122,7 @@ class _SearchContactsWidgetState extends State<SearchContactsWidget> {
                   padding: const EdgeInsets.all(12.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: _searchResult!.map((user) {
+                    children: _searchResult.map((user) {
                       return Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
