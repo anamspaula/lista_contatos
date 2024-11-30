@@ -21,17 +21,17 @@ class UsersStrore {
     isLoading.value = true;
 
     try{
-      // final result = await repository.getUsers();
-      // state.value = result;
-      state.value = [
-        Users(id: "id", name: "name", email: "email", telefone: "telefone", createdAt: DateTime(2024))
-      ];
+      final result = await repository.getUsers();
+      state.value = result;
+      // state.value = [
+      //   Users(id: "id", name: "name", email: "email", telefone: "telefone", createdAt: DateTime(2024))
+      // ];
     } on NotFoundException catch(err){
       // throw Exception(err);
-      error.value = "err.message";
+      error.value = err.message;
     } catch(err) {
       // throw Exception(err);
-      error.value = "err.toString()";
+      error.value = err.toString();
     }
 
     isLoading.value = false;

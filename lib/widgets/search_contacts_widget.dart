@@ -14,7 +14,7 @@ class SearchContactsWidget extends StatefulWidget {
 
 class _SearchContactsWidgetState extends State<SearchContactsWidget> {
   final TextEditingController _searchController = TextEditingController();
-  Iterable<Users>? _searchResult;
+  Iterable<Users> _searchResult = <Users>[];
 
   void _searchContact() {
     final query = _searchController.text.toLowerCase();
@@ -32,8 +32,10 @@ class _SearchContactsWidgetState extends State<SearchContactsWidget> {
   }
 
   void _initializeUsers() async {
-    await widget.usersStrore.getUsers();
-    // setState(() {}); // Atualize o estado após carregar os usuários
+    final users = await widget.usersStrore.getUsers() as Iterable<Users>;
+    setState(() {
+      _searchResult = users;
+    });
   }
 
   @override
