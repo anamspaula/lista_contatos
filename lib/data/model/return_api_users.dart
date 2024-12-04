@@ -1,9 +1,9 @@
 import 'package:myapp/data/model/users_model.dart';
 
-class ReturnApiUsers{
+class ReturnApiUsers<Response>{
     int code;
     String message;
-    List<Users> response;
+    Response? response;
 
     // Construtor com parâmetros
     ReturnApiUsers({
@@ -12,7 +12,18 @@ class ReturnApiUsers{
 
     ReturnApiUsers.obj( dynamic response)
       : code = response['code'],
-        response = (response['response'] as List).map<Users>((item) => Users.fromMap(item)).toList(),
+        response = (response['response'] as List).map<Users>((item) => Users.fromMap(item)).toList() as Response,
+        message = response['message'];
+
+    
+    ReturnApiUsers.objEdit( dynamic response)
+      : code = response['code'],
+        response = Users.fromMap(response['response']) as Response,
+        message = response['message'];
+
+    ReturnApiUsers.objDeleted( dynamic response)
+      : code = response['code'],
+        response = Null as Response,
         message = response['message'];
 
     factory ReturnApiUsers.fromMap(Map<String, dynamic> map){
@@ -21,7 +32,7 @@ class ReturnApiUsers{
       return ReturnApiUsers(
         code: map['code'],
         message: map['message'],
-        response: usersList
+        response: usersList as Response
       );
     }
 }
