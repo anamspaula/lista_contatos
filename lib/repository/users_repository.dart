@@ -9,7 +9,7 @@ import 'package:myapp/https/https_client.dart';
 
 abstract class IUsersRepository{
   Future<List<Users>> getUsers();
-  // Future<ReturnApiUsers> create();
+  Future<ReturnApiUsers<Users>> save({required UsersEdit user});
   Future<ReturnApiUsers<Users>> edit({required String id, required UsersEdit user});
   Future<ReturnApiUsers<Null>> delete({required String id});
 }
@@ -34,6 +34,23 @@ class UsersRepository implements IUsersRepository{
       responseAPI = body.response;
 
       return responseAPI;
+    } else if(response.statusCode == 404){
+      throw NotFoundException("Link inacessivel");
+    }
+    else {
+      throw Exception("Erro inesperado");
+    }
+  }
+
+  @override
+  Future<ReturnApiUsers<Users>> save({required UsersEdit user}) async{
+    final response = await client.save(url: "http://localhost:8080/usuario", user: user);
+
+    if(response.statusCode == 200){
+      final ReturnApiUsers<Users> body = ReturnApiUsers<Users>.objEdit(json.decode(response.body));
+      logger.d(body);
+      
+      return body;
     } else if(response.statusCode == 404){
       throw NotFoundException("Link inacessivel");
     }

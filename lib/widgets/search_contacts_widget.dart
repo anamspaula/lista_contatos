@@ -3,6 +3,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:myapp/data/model/return_api_users.dart';
 import 'package:myapp/data/model/users_model.dart';
 import 'package:myapp/screens/edit_contacts.dart';
+import 'package:myapp/screens/save_contacts.dart';
 import 'package:myapp/screens/stores/users_strore.dart';
 
 class SearchContactsWidget extends StatefulWidget {
@@ -162,9 +163,9 @@ class _SearchContactsWidgetState extends State<SearchContactsWidget> {
                                     usersStore: widget.usersStrore,
                                     onEditSuccess: (bool success) {
                                       if (success) {
-                                        _initializeUsers();  // Atualiza a lista de usuários
+                                        _initializeUsers();  
                                       } else {
-                                        // Tratar falha de edição, por exemplo, mostrando um alerta
+                                        
                                       }
                                     }
                                   ),
@@ -177,8 +178,8 @@ class _SearchContactsWidgetState extends State<SearchContactsWidget> {
                             },
                           ),
                           IconButton(
-                            icon: const Icon(Icons.delete),
-                            color: Colors.white,
+                            icon: const Icon(Icons.delete_forever),
+                            color: Colors.blue,
                             onPressed: () {
                               showDialog(
                                 context: context,
@@ -208,7 +209,7 @@ class _SearchContactsWidgetState extends State<SearchContactsWidget> {
                                                 msg: isDeleted.message,
                                                 toastLength: Toast.LENGTH_SHORT,
                                                 gravity: ToastGravity.BOTTOM,
-                                                timeInSecForIosWeb: 1,
+                                                timeInSecForIosWeb: 3,
                                                 backgroundColor: Colors.green,
                                                 textColor: Colors.white,
                                                 fontSize: 16.0,
@@ -225,7 +226,7 @@ class _SearchContactsWidgetState extends State<SearchContactsWidget> {
                                               msg: e.toString(),
                                               toastLength: Toast.LENGTH_SHORT,
                                               gravity: ToastGravity.BOTTOM,
-                                              timeInSecForIosWeb: 1,
+                                              timeInSecForIosWeb: 3,
                                               backgroundColor: Colors.red,
                                               textColor: Colors.white,
                                               fontSize: 16.0,
@@ -234,19 +235,20 @@ class _SearchContactsWidgetState extends State<SearchContactsWidget> {
                                         },
                                         child: const Text('Excluir'),
                                       ),
-                          ],
-                        );
-                      },
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    foregroundColor: Colors.white,
-                    elevation: 3,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12.0),
-                    ),
-                  ),
+                                    
+                                    ],
+                                  );
+                                },
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              foregroundColor: Colors.blue,
+                              elevation: 3,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12.0),
+                              ),
+                            ),
                 ),
                         ],
                       );
@@ -256,6 +258,37 @@ class _SearchContactsWidgetState extends State<SearchContactsWidget> {
               );
             }
           },
+        ),
+        Positioned(
+          right: 16.0,  // Distância da borda direita
+          bottom: 40.0,  // Distância da borda inferior
+          child: IconButton(
+            icon: const Icon(
+              Icons.add,
+              color: Colors.white, // Cor do ícone
+            ),
+            onPressed: () async {
+              final result = await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => SaveContacts(
+                    usersStore: widget.usersStrore,
+                  ),
+                ),
+              );
+
+              if(result == true){
+                _initializeUsers();
+              }
+            },
+            padding: const EdgeInsets.all(16.0), // Ajuste do padding para o ícone
+            constraints: const BoxConstraints(),
+            style: ButtonStyle(
+              backgroundColor: WidgetStateProperty.all(Colors.blue), // Cor de fundo
+              shape: WidgetStateProperty.all(const CircleBorder()), // Botão redondo
+              elevation: WidgetStateProperty.all(3), // Sombra
+            ),
+          ),
         ),
       ],
     );

@@ -25,9 +25,6 @@ class UsersStrore {
     try{
       final result = await repository.getUsers();
       state.value = result;
-      // state.value = [
-      //   Users(id: "id", name: "name", email: "email", telefone: "telefone", createdAt: DateTime(2024))
-      // ];
     } on NotFoundException catch(err){
       // throw Exception(err);
       error.value = err.message;
@@ -39,9 +36,28 @@ class UsersStrore {
     isLoading.value = false;
   }
 
-  Future editUsers({required String id, required UsersEdit user}) async {
+  Future save({required UsersEdit user}) async {
+    try{
+      ReturnApiUsers<Users> userCreated = await repository.save(user: user);
+
+      final result = await repository.getUsers();
+      state.value = result;
+
+      return userCreated;
+    } on NotFoundException catch(err){
+      throw Exception(err);
+      // error.value = err.message;
+    } catch(err) {
+      // throw Exception(err);
+      error.value = err.toString();
+    }
+  }
+  
+  Future editUsers({required String id, required UsersEdit user, required ValueChanged<bool> onEditSuccess}) async {
     try{
       ReturnApiUsers<Users> userCreated = await repository.edit(id: id, user: user);
+
+      onEditSuccess(true);
 
       final result = await repository.getUsers();
       state.value = result;
@@ -60,8 +76,8 @@ class UsersStrore {
     try{
       ReturnApiUsers<Null> userCreated = await repository.delete(id: id);
 
-      final result = await repository.getUsers();
-      state.value = result;
+      // final result = await repository.getUsers();
+      // state.value = result;
 
       return userCreated;
     } on NotFoundException catch(err){
