@@ -1,17 +1,54 @@
 import 'package:flutter/material.dart';
-import '../widgets/custom_app_bar.dart'; // Importa o CustomAppBar
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:myapp/data/model/return_api_users.dart';
+import 'package:myapp/data/model/users_edit_model.dart';
+import 'package:myapp/data/model/users_model.dart';
+import 'package:myapp/screens/stores/users_strore.dart';
+import 'package:myapp/widgets/custom_app_bar.dart';
 
-class EditContacts extends StatelessWidget {
-  final Map<String, String> contact;
+class EditContacts extends StatefulWidget {
+  final Users? contact;
+  final UsersStrore usersStore;
+  final ValueChanged<bool> onEditSuccess;
 
-  const EditContacts({super.key, required this.contact});
+  const EditContacts({
+    super.key,
+    required this.contact,
+    required this.usersStore,
+    required this.onEditSuccess,
+  });
+
+  @override
+  _EditContactsState createState() => _EditContactsState();
+}
+
+class _EditContactsState extends State<EditContacts> {
+  late TextEditingController _nameController;
+  late TextEditingController _phoneController;
+  late TextEditingController _emailController;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(text: widget.contact?.name);
+    _phoneController = TextEditingController(text: widget.contact?.telefone);
+    _emailController = TextEditingController(text: widget.contact?.email);
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _phoneController.dispose();
+    _emailController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const CustomAppBar(
-        title: 'Editar Contato', // Título dinâmico
-        showBackButton: true, // Exibe o botão de voltar
+        title: 'Editar Contato',
+        showBackButton: true,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -20,27 +57,72 @@ class EditContacts extends StatelessWidget {
             _buildTextField(
               label: 'Nome',
               icon: Icons.person,
-              initialValue: contact['Nome'],
+              controller: _nameController,
             ),
             const SizedBox(height: 16.0),
             _buildTextField(
               label: 'Telefone',
               icon: Icons.phone,
-              initialValue: contact['Telefone'],
+              controller: _phoneController,
             ),
             const SizedBox(height: 16.0),
             _buildTextField(
               label: 'Email',
               icon: Icons.email,
-              initialValue: contact['Email'],
+              controller: _emailController,
             ),
             const SizedBox(height: 16.0),
             Row(
-              mainAxisAlignment: MainAxisAlignment.center, // Espaçamento entre os botões
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(context); // Volta para a tela anterior
+                  onPressed: () async {
+                    String name = _nameController.text;
+                    String telefone = _phoneController.text;
+                    String email = _emailController.text;
+
+                    try {
+                      // Chama a função editUsers e verifica se foi bem-sucedido
+                      ReturnApiUsers<Users> isUpdated = await widget.usersStore.editUsers(
+                        id: widget.contact!.id,
+                        user: UsersEdit(
+                          name: name,
+                          email: email,
+                          telefone: telefone,
+                        ),
+                        onEditSuccess: (success) {
+                          widget.onEditSuccess(success); 
+                        },              
+                      );
+
+                      if (isUpdated.code == 200) {
+                        // Exibe o toast informando que foi atualizado com sucesso
+                        if(mounted){
+                          Fluttertoast.showToast(
+                            msg: "Contato atualizado com sucesso!",
+                            toastLength: Toast.LENGTH_SHORT,
+                            gravity: ToastGravity.BOTTOM,
+                            timeInSecForIosWeb: 3,
+                            backgroundColor: Colors.green,
+                            textColor: Colors.white,
+                            fontSize: 16.0,
+                          );
+                          // Navigator.pop(context, true);
+                        }
+                        
+                      }
+                    } catch (e) {
+                      // Caso ocorra um erro
+                      Fluttertoast.showToast(
+                        msg: "Erro ao atualizar o contato.",
+                        toastLength: Toast.LENGTH_SHORT,
+                        gravity: ToastGravity.BOTTOM,
+                        timeInSecForIosWeb: 3,
+                        backgroundColor: Colors.red,
+                        textColor: Colors.white,
+                        fontSize: 16.0,
+                      );
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
@@ -55,7 +137,6 @@ class EditContacts extends StatelessWidget {
                 const SizedBox(width: 8.0),
                 ElevatedButton(
                   onPressed: () {
-                    // Implementar a lógica para excluir contato
                     showDialog(
                       context: context,
                       builder: (BuildContext context) {
@@ -66,16 +147,47 @@ class EditContacts extends StatelessWidget {
                           actions: [
                             TextButton(
                               onPressed: () {
-                                Navigator.pop(context); // Fecha o diálogo
+                                Navigator.pop(context);
                               },
                               child: const Text('Cancelar'),
                             ),
                             TextButton(
-                              onPressed: () {
-                                // Lógica para excluir o contato
-                                // Exemplo: Remover contato de uma lista ou banco de dados
-                                Navigator.pop(context); // Fecha o diálogo
-                                Navigator.pop(context); // Volta para a tela anterior
+                              onPressed: () async {
+                                try {
+                                  // Chama a função editUsers e verifica se foi bem-sucedido
+                                  ReturnApiUsers<Null> isDeleted = await widget.usersStore.deleteUsers(
+                                    id: widget.contact!.id,
+                                  );
+
+                                  if (isDeleted.code == 200) {
+                                    // Exibe o toast informando que foi atualizado com sucesso
+                                    Fluttertoast.showToast(
+                                      msg: isDeleted.message,
+                                      toastLength: Toast.LENGTH_SHORT,
+                                      gravity: ToastGravity.BOTTOM,
+                                      timeInSecForIosWeb: 3,
+                                      backgroundColor: Colors.green,
+                                      textColor: Colors.white,
+                                      fontSize: 16.0,
+                                    );
+
+                                    if(mounted){
+                                      Navigator.pop(context);
+                                      Navigator.pop(context, true);
+                                    }
+                                  }
+                                } catch (e) {
+                                  // Caso ocorra um erro
+                                  Fluttertoast.showToast(
+                                    msg: e.toString(),
+                                    toastLength: Toast.LENGTH_SHORT,
+                                    gravity: ToastGravity.BOTTOM,
+                                    timeInSecForIosWeb: 3,
+                                    backgroundColor: Colors.red,
+                                    textColor: Colors.white,
+                                    fontSize: 16.0,
+                                  );
+                                }
                               },
                               child: const Text('Excluir'),
                             ),
@@ -102,13 +214,13 @@ class EditContacts extends StatelessWidget {
     );
   }
 
-  /// Método para criar campos de texto reutilizáveis
   Widget _buildTextField({
     required String label,
     required IconData icon,
-    String? initialValue,
+    required TextEditingController controller,
   }) {
     return TextField(
+      controller: controller,
       decoration: InputDecoration(
         labelText: label,
         border: OutlineInputBorder(
@@ -119,7 +231,6 @@ class EditContacts extends StatelessWidget {
           color: Colors.blue,
         ),
       ),
-      controller: TextEditingController(text: initialValue),
     );
   }
 }
