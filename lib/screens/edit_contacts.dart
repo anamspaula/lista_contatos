@@ -9,11 +9,13 @@ import 'package:myapp/widgets/custom_app_bar.dart';
 class EditContacts extends StatefulWidget {
   final Users? contact;
   final UsersStrore usersStore;
+  final ValueChanged<bool> onEditSuccess;
 
   const EditContacts({
     super.key,
     required this.contact,
     required this.usersStore,
+    required this.onEditSuccess,
   });
 
   @override
@@ -88,19 +90,26 @@ class _EditContactsState extends State<EditContacts> {
                           email: email,
                           telefone: telefone,
                         ),
+                        onEditSuccess: (success) {
+                          widget.onEditSuccess(success); 
+                        },              
                       );
 
                       if (isUpdated.code == 200) {
                         // Exibe o toast informando que foi atualizado com sucesso
-                        Fluttertoast.showToast(
-                          msg: "Contato atualizado com sucesso!",
-                          toastLength: Toast.LENGTH_SHORT,
-                          gravity: ToastGravity.BOTTOM,
-                          timeInSecForIosWeb: 1,
-                          backgroundColor: Colors.green,
-                          textColor: Colors.white,
-                          fontSize: 16.0,
-                        );
+                        if(mounted){
+                          Fluttertoast.showToast(
+                            msg: "Contato atualizado com sucesso!",
+                            toastLength: Toast.LENGTH_SHORT,
+                            gravity: ToastGravity.BOTTOM,
+                            timeInSecForIosWeb: 1,
+                            backgroundColor: Colors.green,
+                            textColor: Colors.white,
+                            fontSize: 16.0,
+                          );
+                          // Navigator.pop(context, true);
+                        }
+                        
                       }
                     } catch (e) {
                       // Caso ocorra um erro
@@ -161,6 +170,11 @@ class _EditContactsState extends State<EditContacts> {
                                       textColor: Colors.white,
                                       fontSize: 16.0,
                                     );
+
+                                    if(mounted){
+                                      Navigator.pop(context);
+                                      Navigator.pop(context, true);
+                                    }
                                   }
                                 } catch (e) {
                                   // Caso ocorra um erro

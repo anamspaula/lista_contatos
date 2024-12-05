@@ -23,7 +23,7 @@ class ReturnApiUsers<Response>{
 
     ReturnApiUsers.objDeleted( dynamic response)
       : code = response['code'],
-        response = Null as Response,
+        response = null as Response,
         message = response['message'];
 
     factory ReturnApiUsers.fromMap(Map<String, dynamic> map){

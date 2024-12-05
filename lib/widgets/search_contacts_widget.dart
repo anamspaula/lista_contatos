@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:myapp/data/model/return_api_users.dart';
 import 'package:myapp/data/model/users_model.dart';
 import 'package:myapp/screens/edit_contacts.dart';
 import 'package:myapp/screens/stores/users_strore.dart';
@@ -19,15 +21,6 @@ class _SearchContactsWidgetState extends State<SearchContactsWidget> {
   final TextEditingController _searchController = TextEditingController();
   Iterable<Users> _searchResult = <Users>[];
 
-  void _searchContact() {
-    final query = _searchController.text.toLowerCase();
-    setState(() {
-      _searchResult = widget.usersStrore.state.value!.where(
-        (contact) => contact.name.toLowerCase().contains(query)
-      );
-    });
-  }
-
   @override
   void initState() {
     super.initState();
@@ -35,72 +28,28 @@ class _SearchContactsWidgetState extends State<SearchContactsWidget> {
   }
 
   void _initializeUsers() async {
-    final users = await widget.usersStrore.getUsers() as Iterable<Users>;
+    // Carrega os usuários e realiza a busca quando o carregamento terminar
+    await widget.usersStrore.getUsers(); // Espera o carregamento
+    _searchContact(); // Realiza a busca após o carregamento
+  }
+
+  void _searchContact() {
+    final query = _searchController.text.toLowerCase();
     setState(() {
-      _searchResult = users;
+      _searchResult = widget.usersStrore.state.value!
+          .where((contact) => contact.name.toLowerCase().contains(query));
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Column(
-        children: [
-        //     DefaultTextStyle(
-        //   style: Theme.of(context).textTheme.displayMedium!,
-        //   textAlign: TextAlign.center,
-        //   child: FutureBuilder<List<Users>>(
-        //     future: widget.usersStrore.state.value, // a previously-obtained Future<String> or null
-        //     builder: (BuildContext context, AsyncSnapshot<List<Users>> snapshot) {
-        //       List<Widget> children;
-        //       if (snapshot.hasData) {
-        //         children = <Widget>[
-        //           const Icon(
-        //             Icons.check_circle_outline,
-        //             color: Colors.green,
-        //             size: 60,
-        //           ),
-        //           Padding(
-        //             padding: const EdgeInsets.only(top: 16),
-        //             child: Text('Result: ${snapshot.data}'),
-        //           ),
-        //         ];
-        //       } else if (snapshot.hasError) {
-        //         children = <Widget>[
-        //           const Icon(
-        //             Icons.error_outline,
-        //             color: Colors.red,
-        //             size: 60,
-        //           ),
-        //           Padding(
-        //             padding: const EdgeInsets.only(top: 16),
-        //             child: Text('Error: ${snapshot.error}'),
-        //           ),
-        //         ];
-        //       } else {
-        //         children = const <Widget>[
-        //           SizedBox(
-        //             width: 60,
-        //             height: 60,
-        //             child: CircularProgressIndicator(),
-        //           ),
-        //           Padding(
-        //             padding: EdgeInsets.only(top: 16),
-        //             child: Text('Awaiting result...'),
-        //           ),
-        //         ];
-        //       }
-        //       return Center(
-        //         child: Column(
-        //           mainAxisAlignment: MainAxisAlignment.center,
-        //           children: children,
-        //         ),
-        //       );
-        //     },
-        //   ),
-        // ),
-
+      children: [
         TextField(
           controller: _searchController,
+          onChanged: (query) {
+            _searchContact(); // Refiltra sempre que o texto mudar
+          },
           decoration: InputDecoration(
             labelText: 'Buscar',
             border: OutlineInputBorder(
@@ -111,17 +60,13 @@ class _SearchContactsWidgetState extends State<SearchContactsWidget> {
         ),
         const SizedBox(height: 16.0),
         AnimatedBuilder(
-          animation: Listenable.merge([
-            widget.usersStrore.error,
-            widget.usersStrore.isLoading,
-            widget.usersStrore.state
-          ]),
+          animation: Listenable.merge([widget.usersStrore.isLoading, widget.usersStrore.state, widget.usersStrore.error]),
           builder: (context, child) {
             if (widget.usersStrore.isLoading.value) {
               return const CircularProgressIndicator();
             }
 
-            if(widget.usersStrore.error.value.isNotEmpty){
+            if (widget.usersStrore.error.value.isNotEmpty) {
               return Card(
                 elevation: 2,
                 color: Colors.white,
@@ -133,14 +78,12 @@ class _SearchContactsWidgetState extends State<SearchContactsWidget> {
                   width: double.infinity,
                   padding: const EdgeInsets.all(12.0),
                   child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded( // Adicionado para permitir que o texto quebre dentro do espaço disponível
+                      Expanded(
                         child: Text(
                           'Erro ao tentar conectar com o db ${widget.usersStrore.error.value}',
-                          textAlign: TextAlign.left, // Ajustado para alinhar corretamente
-                          softWrap: true, // Permite quebra automática
-                          overflow: TextOverflow.clip, // Corta o texto ao final do espaço
+                          softWrap: true,
+                          overflow: TextOverflow.clip,
                         ),
                       ),
                     ],
@@ -149,7 +92,7 @@ class _SearchContactsWidgetState extends State<SearchContactsWidget> {
               );
             }
 
-            if (widget.usersStrore.state.value!.isEmpty) {
+            if (_searchResult.isEmpty) {
               return Card(
                 elevation: 2,
                 color: Colors.white,
@@ -160,12 +103,7 @@ class _SearchContactsWidgetState extends State<SearchContactsWidget> {
                 child: Container(
                   width: double.infinity,
                   padding: const EdgeInsets.all(12.0),
-                  child: const Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text("Não foi possível encontrar nenhum usuário"),
-                    ],
-                  ),
+                  child: const Text("Não foi possível encontrar nenhum usuário"),
                 ),
               );
             } else {
@@ -188,7 +126,7 @@ class _SearchContactsWidgetState extends State<SearchContactsWidget> {
                           CircleAvatar(
                             backgroundColor: Colors.blue,
                             child: Text(
-                              user.name[0], // Primeiro caractere do nome
+                              user.name[0],
                               style: const TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
@@ -215,38 +153,109 @@ class _SearchContactsWidgetState extends State<SearchContactsWidget> {
                           IconButton(
                             icon: const Icon(Icons.edit),
                             color: Colors.blue,
-                            onPressed: () {
-                              Navigator.push(
+                            onPressed: () async {
+                              final result = await Navigator.push(
                                 context,
                                 MaterialPageRoute(
                                   builder: (context) => EditContacts(
                                     contact: user,
                                     usersStore: widget.usersStrore,
+                                    onEditSuccess: (bool success) {
+                                      if (success) {
+                                        _initializeUsers();  // Atualiza a lista de usuários
+                                      } else {
+                                        // Tratar falha de edição, por exemplo, mostrando um alerta
+                                      }
+                                    }
                                   ),
                                 ),
                               );
+
+                              if(result == true){
+                                _initializeUsers();
+                              }
                             },
                           ),
+                          IconButton(
+                            icon: const Icon(Icons.delete),
+                            color: Colors.white,
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: const Text('Confirmar Exclusão'),
+                                    content: const Text(
+                                        'Tem certeza de que deseja excluir este contato?'),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                        },
+                                        child: const Text('Cancelar'),
+                                      ),
+                                      TextButton(
+                                        onPressed: () async {
+                                          try {
+                                            // Chama a função editUsers e verifica se foi bem-sucedido
+                                            ReturnApiUsers<Null> isDeleted = await widget.usersStrore.deleteUsers(
+                                              id: user.id,
+                                            );
+
+                                            if (isDeleted.code == 200) {
+                                              // Exibe o toast informando que foi atualizado com sucesso
+                                              Fluttertoast.showToast(
+                                                msg: isDeleted.message,
+                                                toastLength: Toast.LENGTH_SHORT,
+                                                gravity: ToastGravity.BOTTOM,
+                                                timeInSecForIosWeb: 1,
+                                                backgroundColor: Colors.green,
+                                                textColor: Colors.white,
+                                                fontSize: 16.0,
+                                              );
+
+                                              if(mounted){
+                                                _initializeUsers();
+                                                Navigator.pop(context);
+                                              }
+                                            }
+                                          } catch (e) {
+                                            // Caso ocorra um erro
+                                            Fluttertoast.showToast(
+                                              msg: e.toString(),
+                                              toastLength: Toast.LENGTH_SHORT,
+                                              gravity: ToastGravity.BOTTOM,
+                                              timeInSecForIosWeb: 1,
+                                              backgroundColor: Colors.red,
+                                              textColor: Colors.white,
+                                              fontSize: 16.0,
+                                            );
+                                          }
+                                        },
+                                        child: const Text('Excluir'),
+                                      ),
+                          ],
+                        );
+                      },
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue,
+                    foregroundColor: Colors.white,
+                    elevation: 3,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                  ),
+                ),
                         ],
                       );
-                    }).toList(), // Converte o Iterable para uma lista
+                    }).toList(),
                   ),
                 ),
               );
             }
           },
-        ),
-        ElevatedButton(
-          onPressed: _searchContact,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.blue,
-            foregroundColor: Colors.white,
-            elevation: 5,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12.0),
-            ),
-          ),
-          child: const Text('Procurar'),
         ),
       ],
     );
